@@ -10,3 +10,4 @@ Cargo.lock
 **/*.rs.bk
 
 .lisprs_hist
+init.scm
