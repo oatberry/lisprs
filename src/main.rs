@@ -84,8 +84,11 @@ fn command(interpreter: &Interpreter, cmd: &str, opt: &Opt) -> String {
             if let Some(initfile) = &opt.initfile {
                 match interpreter.save_env(initfile) {
                     Ok(_) => "".to_owned(),
-                    Err(err) => { log::warn(err); "".to_owned() }
-                } 
+                    Err(err) => {
+                        log::warn(err);
+                        "".to_owned()
+                    }
+                }
             } else {
                 "no initfile set.".to_owned()
             }
