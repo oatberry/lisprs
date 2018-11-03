@@ -1,5 +1,6 @@
 use failure::Error;
 
+use std::ffi::OsStr;
 use std::fmt::Debug;
 use std::fs::File;
 use std::io::prelude::*;
@@ -16,25 +17,32 @@ impl Interpreter {
     where
         P: AsRef<Path> + Debug,
     {
-        let file = File::open(path)?;
+        let file = File::open(&path)?;
         let buf = BufReader::new(file);
         let mut lines = buf.lines().enumerate();
+
+        let filename = path.as_ref()
+            .file_name()
+            .unwrap_or(OsStr::new("<unknown>"))
+            .to_string_lossy();
 
         while let Some((linenum, Ok(line))) = lines.next() {
             if let Err(err) = self.run(line.as_str()) {
                 match err.downcast::<ParseError>() {
                     Ok(ParseError::Empty) => continue,
                     Ok(err) => log::warn(format!(
-                        "parsing error on line {}:\n  {}\n  {}",
+                        "parsing error in {}:{}:\n  {}\n  {}",
+                        filename,
                         linenum + 1,
-                        line,
-                        err
+                        err,
+                        line
                     )),
                     Err(err) => log::warn(format!(
-                        "runtime error on line {}:\n  {}\n  {}",
+                        "runtime error in {}:{}:\n  {}\n  {}",
+                        filename,
                         linenum + 1,
-                        line,
-                        err
+                        err,
+                        line
                     )),
                 }
             }

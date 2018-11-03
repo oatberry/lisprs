@@ -8,20 +8,20 @@ pub const RESET: &str = "\x1B[0m";
 
 #[allow(dead_code)]
 pub fn error<S: Display>(msg: S) {
-    eprintln!("{}error:{} {}", RED, RESET, msg);
+    eprintln!("[lisprs] {}error:{} {}", RED, RESET, msg);
 }
 
 #[allow(dead_code)]
 pub fn warn<S: Display>(msg: S) {
-    eprintln!("{}warning:{} {}", YEL, RESET, msg);
+    eprintln!("[lisprs] {}warning:{} {}", YEL, RESET, msg);
 }
 
 #[allow(dead_code)]
 pub fn info<S: Display>(msg: S) {
-    eprintln!("{}info:{} {}", GRN, RESET, msg);
+    eprintln!("[lisprs] {}info:{} {}", GRN, RESET, msg);
 }
 
 #[allow(dead_code)]
 pub fn debug<S: Display>(msg: S) {
-    eprintln!("{}DEBUG:{} {}", GRY, RESET, msg);
+    eprintln!("[lisprs] {}DEBUG:{} {}", GRY, RESET, msg);
 }
