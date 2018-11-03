@@ -3,6 +3,7 @@
 #[macro_use]
 extern crate failure_derive;
 
+mod arithmetic;
 mod builtins;
 mod env;
 mod eval;

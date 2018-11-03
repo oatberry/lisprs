@@ -40,13 +40,13 @@ fn resolve_symbol(symbol: &str, env: EnvRef) -> Value {
         // touch me not
         "nil"   => Nil,
         "else"  => Bool(true),
-        "pi"    => Number(consts::PI),
-        "e"     => Number(consts::E),
-        "NAN"   => Number(f64::NAN),
-        "INF"   => Number(f64::INFINITY),
-        "-INF"  => Number(f64::NEG_INFINITY),
-        "MAX"   => Number(f64::MAX),
-        "MIN"   => Number(f64::MIN),
+        "pi"    => Float(consts::PI),
+        "e"     => Float(consts::E),
+        "NAN"   => Float(f64::NAN),
+        "INF"   => Float(f64::INFINITY),
+        "-INF"  => Float(f64::NEG_INFINITY),
+        "MAX"   => Float(f64::MAX),
+        "MIN"   => Float(f64::MIN),
         _       => env.borrow().get(symbol),
     }
 }

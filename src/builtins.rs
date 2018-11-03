@@ -26,7 +26,6 @@ pub const BUILTINS: &[(&str, fn(Vec<Value>, EnvRef) -> Result<Value, Error>)] = 
     ("-",           sub),
     ("*",           mul),
     ("/",           div),
-    ("^",           exp),
     ("modulo",      modulo),
     ("=",           eq),
     ("!=",          neq),
@@ -274,31 +273,36 @@ pub fn env(_args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
 ///        (* <num> <num>)
 ///        (/ <num> <num>)
 ///        (^ <num> <num>)
-///        (% <num> <num>)
-///        (log <num> <num>)
 fn math(op: &str, mut args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
     if args.len() < 2 {
         return procerr!(op, "at least 2 arguments required")
     }
 
     args = eval::eval_list(args, env)?;
-    let mut nums: Vec<f64> = Vec::with_capacity(args.len());
-    for arg in args {
-        let num: f64 = extract!(arg, Number, op)?;
-        nums.push(num);
+    // make sure all arguments are floats or integers
+    for arg in &args {
+        match arg {
+            Integer(_) => continue,
+            Float(_) => continue,
+            _ => return Err(RunError::TypeError {
+                name: op.to_string(),
+                expected: "number".to_string(),
+                got: arg.get_type(),
+            }.into())
+        }
     }
 
-    let init = nums.remove(0);
+    let init = args.remove(0);
     let result = match op {
-        "+" => nums.iter().fold(init, |acc, n| acc + n),
-        "-" => nums.iter().fold(init, |acc, n| acc - n),
-        "*" => nums.iter().fold(init, |acc, n| acc * n),
-        "/" => nums.iter().fold(init, |acc, n| acc / n),
-        "^" => nums.iter().fold(init, |acc, n| acc.powf(*n)),
+        "+" => args.into_iter().fold(init, |acc, n| acc + n),
+        "-" => args.into_iter().fold(init, |acc, n| acc - n),
+        "*" => args.into_iter().fold(init, |acc, n| acc * n),
+        "/" => args.into_iter().fold(init, |acc, n| acc / n),
+        "%" => init % args.remove(0),
         _ => panic!("'{}' is not a valid math operator, check your code! "),
     };
 
-    Ok(Number(result))
+    Ok(result)
 }
 
 pub fn add(args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
@@ -317,17 +321,8 @@ pub fn div(args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
     math("/", args, env)
 }
 
-pub fn exp(args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
-    math("^", args, env)
-}
-
-pub fn modulo(mut args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
-    check_num_args!(args, 2, "modulo")?;
-
-    args = eval::eval_list(args, env)?;
-    let a: f64 = extract!(&args[0], &Number, "modulo")?;
-    let b: f64 = extract!(&args[1], &Number, "modulo")?;
-    Ok(Number(a % b))
+pub fn modulo(args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
+    math("%", args, env)
 }
 // }}}
 
@@ -422,8 +417,8 @@ pub fn length(mut args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
 
     args = eval::eval_list(args, env)?;
     match args[0] {
-        List(ref l) => Ok(Number(l.len() as f64)),
-        Str(ref s)  => Ok(Number(s.chars().count() as f64)),
+        List(ref l) => Ok(Integer(l.len() as i64)),
+        Str(ref s)  => Ok(Integer(s.chars().count() as i64)),
         _ => procerr!("length", format!("expected a `List` or `Str`, got a {} instead",
                                         args[0].get_type())),
     }
@@ -436,7 +431,7 @@ pub fn list_ref(mut args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
 
     args = eval::eval_list(args, env)?;
     let list: Vec<Value> = extract!(&args[0], &List, "list-ref")?;
-    let idx = extract!(args[1], Number, "list-ref")?;
+    let idx = extract!(args[1], Integer, "list-ref")?;
     list.get(idx as usize - 1)
         .cloned()
         .ok_or(RunError::IndexOutOfBounds(idx as usize).into())

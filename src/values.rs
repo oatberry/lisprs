@@ -8,7 +8,6 @@ use std::rc::Rc;
 use crate::env::*;
 use crate::eval;
 use crate::errors::*;
-// use crate::log;
 use crate::parser::{self, Token};
 
 /// representation of lisprs' data types
@@ -16,7 +15,8 @@ use crate::parser::{self, Token};
 pub enum Value {
     Symbol(String),
     Str(String),
-    Number(f64),
+    Integer(i64),
+    Float(f64),
     Bool(bool),
     List(Vec<Value>),
     Proc(Box<LispProc>),
@@ -46,7 +46,8 @@ impl Value {
         match self {
             Symbol(s)   => s.clone(),
             Str(s)      => s.to_owned(),
-            Number(n)   => n.to_string(),
+            Integer(n)  => n.to_string(),
+            Float(n)    => n.to_string(),
             Bool(true)  => "#t".to_owned(),
             Bool(false) => "#f".to_owned(),
             Nil         => "nil".to_owned(),
@@ -65,9 +66,10 @@ impl Value {
     /// represent a `Value` as a slightly less human-friendly string for saving externally
     pub fn serialize(&self) -> String {
         match self {
-            Symbol(x)   => x.clone(),
-            Str(x)      => format!("\"{}\"", x),
-            Number(x)   => x.to_string(),
+            Symbol(s)   => s.clone(),
+            Str(s)      => format!("\"{}\"", s),
+            Integer(n)  => n.to_string(),
+            Float(n)    => n.to_string(),
             Bool(true)  => "#t".to_owned(),
             Bool(false) => "#f".to_owned(),
             Nil         => "nil".to_owned(),
@@ -86,24 +88,26 @@ impl Value {
     /// make a bool out of a value. nil, empty list, and 0 are falsy.
     pub fn to_bool(&self) -> bool {
         match self {
-            Bool(x)   => *x,
-            Nil       => false,
-            List(x)   => x.len() == 0,
-            Number(x) => *x != 0f64,
-            _         => true,
+            Bool(b)    => *b,
+            Nil        => false,
+            List(l)    => l.len() == 0,
+            Integer(n) => *n != 0i64,
+            Float(n)   => *n != 0f64,
+            _          => true,
         }
     }
 
     /// get the human-friendly type of a `Value`
     pub fn get_type(&self) -> String {
         match self {
-            Symbol(_) => "Symbol",
-            Str(_)    => "Str",
-            Number(_) => "Number",
-            Bool(_)   => "Bool",
-            List(_)   => "List",
-            Proc(_)   => "Proc",
-            Nil       => "Nil",
+            Symbol(_)  => "Symbol",
+            Str(_)     => "Str",
+            Integer(_) => "Integer",
+            Float(_)   => "Float",
+            Bool(_)    => "Bool",
+            List(_)    => "List",
+            Proc(_)    => "Proc",
+            Nil        => "Nil",
         }.to_owned()
     }
 }
@@ -117,11 +121,14 @@ impl fmt::Display for Value {
 impl PartialEq for Value {
     fn eq(&self, other: &Value) -> bool {
         match (self, other) {
-            (Bool(a), Bool(b)) => a == b,
-            (Number(a), Number(b)) => a == b,
-            (Symbol(a), Symbol(b)) => a == b,
-            (Str(a), Str(b)) => a == b,
-            (Nil, Nil) => true,
+            (Bool(a), Bool(b))       => a == b,
+            (Integer(a), Integer(b)) => a == b,
+            (Float(a), Float(b))     => a == b,
+            (Integer(a), Float(b))   => &(*a as f64) == b,
+            (Float(a), Integer(b))   => a == &(*b as f64),
+            (Symbol(a), Symbol(b))   => a == b,
+            (Str(a), Str(b))         => a == b,
+            (Nil, Nil)               => true,
             _ => false, // values of different types are not equivalent
         }
     }
@@ -129,10 +136,12 @@ impl PartialEq for Value {
 
 impl PartialOrd for Value {
     fn partial_cmp(&self, other: &Value) -> Option<Ordering> {
-        if let (Number(a), Number(b)) = (self, other) {
-            a.partial_cmp(b)
-        } else {
-            None
+        match (self, other) {
+            (Integer(a), Integer(b)) => a.partial_cmp(b),
+            (Float(a), Float(b))     => a.partial_cmp(b),
+            (Integer(a), Float(b))   => (*a as f64).partial_cmp(b),
+            (Float(a), Integer(b))   => a.partial_cmp(&(*b as f64)),
+            _ => None
         }
     }
 }

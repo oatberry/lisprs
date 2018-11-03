@@ -123,8 +123,10 @@ impl Value {
             token.pop();
             token.remove(0);
             Str(token)
+        } else if let Ok(n) = token.parse::<i64>() {
+            Integer(n)
         } else if let Ok(n) = token.parse::<f64>() {
-            Number(n)
+            Float(n)
         } else if &token == "#t" {
             Bool(true)
         } else if &token == "#f" {
