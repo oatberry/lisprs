@@ -27,6 +27,7 @@ pub const BUILTINS: &[(&str, fn(Vec<Value>, EnvRef) -> Result<Value, Error>)] = 
     ("*",           mul),
     ("/",           div),
     ("^",           exp),
+    ("modulo",      modulo),
     ("=",           eq),
     ("!=",          neq),
     (">",           gt),
@@ -318,6 +319,15 @@ pub fn div(args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
 
 pub fn exp(args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
     math("^", args, env)
+}
+
+pub fn modulo(mut args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
+    check_num_args!(args, 2, "modulo")?;
+
+    args = eval::eval_list(args, env)?;
+    let a: f64 = extract!(&args[0], &Number, "modulo")?;
+    let b: f64 = extract!(&args[1], &Number, "modulo")?;
+    Ok(Number(a % b))
 }
 // }}}
 
