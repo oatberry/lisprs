@@ -24,7 +24,7 @@ pub enum RunError {
     TypeError {
         name: String,
         expected: String,
-        got: String
+        got: String,
     },
 
     #[fail(display = "value {} (of type {}) is uncallable", name, typename)]
@@ -34,7 +34,7 @@ pub enum RunError {
     WrongNumArgs {
         name: String,
         expected: usize,
-        got: usize
+        got: usize,
     },
 
     #[fail(display = "division by zero is undefined")]

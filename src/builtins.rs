@@ -134,8 +134,8 @@ pub fn define(args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
 
             let proc_name: String = extract!(list.remove(0), Symbol, "define")?;
             let body = args[1].clone();
-            let proc = lambda(vec![List(list.to_vec()), body], env.clone())?;
-            env.borrow_mut().define(&proc_name, proc);
+            let procedure = lambda(vec![List(list.to_vec()), body], env.clone())?;
+            env.borrow_mut().define(&proc_name, procedure);
             success!()
         },
 
@@ -262,7 +262,13 @@ pub fn eval(mut args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
 /// return a list of all defined symbols
 /// usage: (env)
 pub fn env(_args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
-    Ok(List(env.borrow().vars.keys().map(|s| Symbol(s.to_owned())).collect()))
+    Ok(List(
+        env.borrow()
+            .vars
+            .keys()
+            .map(|s| Symbol(s.to_owned()))
+            .collect()
+    ))
 }
 // }}}
 
@@ -275,7 +281,7 @@ pub fn env(_args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
 ///        (^ <num> <num>)
 fn math(op: &str, mut args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
     if args.len() < 2 {
-        return procerr!(op, "at least 2 arguments required")
+        return procerr!(op, "at least 2 arguments required");
     }
 
     args = eval::eval_list(args, env)?;
@@ -283,12 +289,14 @@ fn math(op: &str, mut args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
     for arg in &args {
         match arg {
             Integer(_) => continue,
-            Float(_) => continue,
-            _ => return Err(RunError::TypeError {
-                name: op.to_string(),
-                expected: "number".to_string(),
-                got: arg.get_type(),
-            }.into())
+            Float(_)   => continue,
+            _ => {
+                return Err(RunError::TypeError {
+                    name: op.to_string(),
+                    expected: "number".to_string(),
+                    got: arg.get_type(),
+                }.into());
+            }
         }
     }
 
@@ -425,8 +433,9 @@ pub fn length(mut args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
     match args[0] {
         List(ref l) => Ok(Integer(l.len() as i64)),
         Str(ref s)  => Ok(Integer(s.chars().count() as i64)),
-        _ => procerr!("length", format!("expected a `List` or `Str`, got a {} instead",
-                                        args[0].get_type())),
+        _ => procerr!("length",
+                      format!("expected a `List` or `Str`, got a {} instead",
+                              args[0].get_type())),
     }
 }
 

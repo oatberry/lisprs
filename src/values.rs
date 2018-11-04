@@ -51,15 +51,11 @@ impl Value {
             Bool(true)  => "#t".to_owned(),
             Bool(false) => "#f".to_owned(),
             Nil         => "nil".to_owned(),
-            List(list)  => format!(
-                "({})",
-                join(list.iter().map(|item| item.serialize()), " ")
-            ),
-            Proc(proc)  => format!(
-                "(lambda ({}) {})",
-                join(proc.params.iter(), " "),
-                proc.body.to_string()
-            ),
+            List(list)  => format!("({})",
+                                   join(list.iter().map(|item| item.serialize()), " ")),
+            Proc(p)     => format!("(lambda ({}) {})",
+                                   join(p.params.iter(), " "),
+                                   p.body.to_string()),
         }
     }
 
@@ -73,15 +69,11 @@ impl Value {
             Bool(true)  => "#t".to_owned(),
             Bool(false) => "#f".to_owned(),
             Nil         => "nil".to_owned(),
-            List(list)  => format!(
-                "({})",
-                join(list.iter().map(|item| item.serialize()), " ")
-            ),
-            Proc(proc)  => format!(
-                "(lambda ({}) {})",
-                join(proc.params.iter(), " "),
-                proc.body.serialize()
-            ),
+            List(list)  => format!("({})",
+                                   join(list.iter().map(|item| item.serialize()), " ")),
+            Proc(p)     => format!("(lambda ({}) {})",
+                                   join(p.params.iter(), " "),
+                                   p.body.serialize()),
         }
     }
 
@@ -93,7 +85,7 @@ impl Value {
             List(l)    => l.is_empty(),
             Integer(n) => *n != 0i64,
             Float(n)   => *n != 0f64,
-            _          => true,
+            _ => true,
         }
     }
 
