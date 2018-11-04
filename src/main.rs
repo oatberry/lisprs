@@ -25,7 +25,7 @@ fn main() {
         log::debug(format!("set options: {:?}", opt))
     }
 
-    let interpreter = Interpreter::new();
+    let interpreter = Interpreter::default();
     if let Some(initfile) = &opt.initfile {
         if let Err(why) = interpreter.run_file(initfile) {
             log::warn(why);
@@ -44,8 +44,8 @@ fn main() {
 
         match input {
             Ok(line) => {
-                if line.len() > 0 {
-                    if line.starts_with(">") && line.len() > 1 {
+                if !line.is_empty() {
+                    if line.starts_with('>') && line.len() > 1 {
                         println!("{}", command(&interpreter, &line[1..], &opt));
                     } else {
                         rl.add_history_entry(line.as_ref());

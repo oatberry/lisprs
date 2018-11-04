@@ -28,11 +28,11 @@ use self::Value::*;
 impl Value {
     /// parse a string into a structured s-expression
     pub fn new(s: String) -> Result<Self, Error> {
-        let mut tokens = parser::tokenize(s);
+        let mut tokens = parser::tokenize(&s);
         let left_parens = tokens.iter().filter(|&t| t == &Token::LeftParen).count();
         let right_parens = tokens.iter().filter(|&t| t == &Token::RightParen).count();
 
-        if tokens.len() == 0 {
+        if tokens.is_empty() {
             Err(ParseError::Empty)?
         } else if left_parens == right_parens {
             Value::from_tokens(&mut tokens)
@@ -90,7 +90,7 @@ impl Value {
         match self {
             Bool(b)    => *b,
             Nil        => false,
-            List(l)    => l.len() == 0,
+            List(l)    => l.is_empty(),
             Integer(n) => *n != 0i64,
             Float(n)   => *n != 0f64,
             _          => true,
@@ -163,7 +163,7 @@ impl LispProc {
 
         if !self.params.contains(&".".to_owned()) && (args.len() != self.params.len()) {
             Err(RunError::WrongNumArgs {
-                name: name,
+                name,
                 expected: self.params.len(),
                 got: args.len(),
             })?

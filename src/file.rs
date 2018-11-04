@@ -23,7 +23,7 @@ impl Interpreter {
 
         let filename = path.as_ref()
             .file_name()
-            .unwrap_or(OsStr::new("<unknown>"))
+            .unwrap_or_else(|| OsStr::new("<unknown>"))
             .to_string_lossy();
 
         while let Some((linenum, Ok(line))) = lines.next() {

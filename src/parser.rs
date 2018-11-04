@@ -11,7 +11,7 @@ pub enum Token {
 }
 
 /// parse a string of code into individual “bits” of syntax
-pub fn tokenize(string: String) -> Vec<Token> {
+pub fn tokenize(string: &str) -> Vec<Token> {
     let mut tokens: Vec<Token> = Vec::new();
     let mut item = String::new();
 
@@ -69,7 +69,7 @@ pub fn tokenize(string: String) -> Vec<Token> {
 }
 
 fn push_item(item: &mut String, tokens: &mut Vec<Token>) {
-    if item.len() != 0 {
+    if !item.is_empty() {
         tokens.push(Token::Item(item.clone()));
         item.clear();
     }

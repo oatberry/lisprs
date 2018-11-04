@@ -15,7 +15,7 @@ pub fn eval(s_exp: Value, env: EnvRef) -> Result<Value, Error> {
 
     match s_exp {
         Symbol(ref sym) => {
-            if sym.starts_with("'") {
+            if sym.starts_with('\'') {
                 Ok(Symbol(sym[1..].to_owned()))
             } else {
                 Ok(resolve_symbol(sym, env))
@@ -23,7 +23,7 @@ pub fn eval(s_exp: Value, env: EnvRef) -> Result<Value, Error> {
         }
 
         List(list) => {
-            if list.len() == 0 {
+            if list.is_empty() {
                 Ok(Nil)
             } else {
                 run_proc(list, env)

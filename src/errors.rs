@@ -27,7 +27,7 @@ pub enum RunError {
         got: String
     },
 
-    #[fail(display = "value `{}` (of type {}) is uncallable", name, typename)]
+    #[fail(display = "value {} (of type {}) is uncallable", name, typename)]
     UncallableValue { name: String, typename: String },
 
     #[fail(display = "{}: expected {} params, got {} instead", name, expected, got)]

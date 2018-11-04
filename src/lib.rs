@@ -26,13 +26,6 @@ pub struct Interpreter {
 }
 
 impl Interpreter {
-    /// create a new Interpreter
-    pub fn new() -> Interpreter {
-        Interpreter {
-            env: Rc::new(RefCell::new(Env::new(None))),
-        }
-    }
-
     /// evaluate a string as lisp code
     pub fn run<S: Into<String>>(&self, code: S) -> Result<Value, Error> {
         // parse into an s-expression
@@ -40,6 +33,12 @@ impl Interpreter {
 
         // log::debug(format!("{:?}", sexp));
         eval::eval(sexp, self.env.clone())
+    }
+}
+
+impl Default for Interpreter {
+    fn default() -> Self {
+        Interpreter { env: Rc::new(RefCell::new(Env::new(None))) }
     }
 }
 

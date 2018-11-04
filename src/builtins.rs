@@ -128,7 +128,7 @@ pub fn define(args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
 
         List(list) => {
             let mut list = list.clone();
-            if list.len() < 1 {
+            if list.is_empty() {
                 return procerr!("define", "cannot define an empty list");
             }
 
@@ -218,7 +218,7 @@ pub fn if_else(args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
 ///              (...)
 ///              (else <alternate-expr>))
 pub fn cond(args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
-    if args.len() < 1 {
+    if args.is_empty() {
         return procerr!("cond", "at least 1 branch required");
     }
 
@@ -293,7 +293,7 @@ fn math(op: &str, mut args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
     }
 
     if op == "/" || op == "%" {
-        if let Some(_) = args.iter().skip(1).find(|&x| x == &Integer(0)) {
+        if args.iter().skip(1).find(|&x| x == &Integer(0)).is_some() {
             return Err(RunError::DivideByZero.into());
         }
     }
@@ -305,7 +305,7 @@ fn math(op: &str, mut args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
         "*" => args.into_iter().fold(init, |acc, n| acc * n),
         "/" => args.into_iter().fold(init, |acc, n| acc / n),
         "%" => init % args.remove(0),
-        _ => panic!("'{}' is not a valid math operator, check your code! "),
+        _ => panic!("'{}' is not a valid math operator, check your code!", op),
     };
 
     Ok(result)
@@ -479,7 +479,7 @@ pub fn cdr(mut args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
 /// usage: (rand <list>)
 ///        (rand <expr> <expr> ...)
 pub fn rand(mut args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
-    if args.len() == 0 {
+    if args.is_empty() {
         procerr!("rand", "at least 1 argument required")
     } else if args.len() > 1 {
         args = eval::eval_list(args, env)?;
