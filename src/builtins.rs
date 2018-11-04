@@ -292,6 +292,12 @@ fn math(op: &str, mut args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
         }
     }
 
+    if op == "/" || op == "%" {
+        if let Some(_) = args.iter().skip(1).find(|&x| x == &Integer(0)) {
+            return Err(RunError::DivideByZero.into());
+        }
+    }
+
     let init = args.remove(0);
     let result = match op {
         "+" => args.into_iter().fold(init, |acc, n| acc + n),

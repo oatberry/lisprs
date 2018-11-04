@@ -37,6 +37,6 @@ pub enum RunError {
         got: usize
     },
 
-    // #[fail(display = "division by zero is undefined")]
-    // DivideByZero,
+    #[fail(display = "division by zero is undefined")]
+    DivideByZero,
 }
