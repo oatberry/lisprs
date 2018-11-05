@@ -67,24 +67,24 @@ fn run_proc(mut args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
             let first_value = resolve_symbol(&s, env.clone());
             if let Proc(procedure) = first_value {
                 args = eval_list(args, env.clone())?;
-                procedure.call(s, args)
+                return procedure.call(s, args);
             } else {
-                Err(RunError::UncallableValue {
+                return Err(RunError::UncallableValue {
                     name: s,
                     typename: first_value.get_type(),
-                })?
+                }.into());
             }
         }
 
         List(l) => {
             let result = eval(List(l), env.clone())?;
             args.insert(0, result);
-            eval(List(args), env.clone())
+            return eval(List(args), env.clone());
         }
 
         Proc(p) => {
             args = eval_list(args, env.clone())?;
-            p.call("<anonymous procedure>".to_owned(), args)
+            return p.call("<anonymous procedure>".to_owned(), args);
         }
 
         _ => {
