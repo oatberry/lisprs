@@ -33,11 +33,11 @@ impl Value {
         let right_parens = tokens.iter().filter(|&t| t == &Token::RightParen).count();
 
         if tokens.is_empty() {
-            Err(ParseError::Empty)?
+            Err(ParseError::Empty.into())
         } else if left_parens == right_parens {
             Value::from_tokens(&mut tokens)
         } else {
-            Err(ParseError::MismatchedParens)?
+            Err(ParseError::MismatchedParens.into())
         }
     }
 
@@ -51,8 +51,10 @@ impl Value {
             Bool(true)  => "#t".to_owned(),
             Bool(false) => "#f".to_owned(),
             Nil         => "nil".to_owned(),
+
             List(list)  => format!("({})",
                                    join(list.iter().map(|item| item.serialize()), " ")),
+
             Proc(p)     => format!("(lambda ({}) {})",
                                    join(p.params.iter(), " "),
                                    p.body.to_string()),
@@ -69,8 +71,10 @@ impl Value {
             Bool(true)  => "#t".to_owned(),
             Bool(false) => "#f".to_owned(),
             Nil         => "nil".to_owned(),
+
             List(list)  => format!("({})",
                                    join(list.iter().map(|item| item.serialize()), " ")),
+
             Proc(p)     => format!("(lambda ({}) {})",
                                    join(p.params.iter(), " "),
                                    p.body.serialize()),
@@ -154,11 +158,11 @@ impl LispProc {
         // log::debug(format!("calling {} with args: {:?}", name, args));
 
         if !self.params.contains(&".".to_owned()) && (args.len() != self.params.len()) {
-            Err(RunError::WrongNumArgs {
+            return Err(RunError::WrongNumArgs {
                 name,
                 expected: self.params.len(),
                 got: args.len(),
-            })?
+            }.into());
         }
 
         let mut local_env = Env::new(Some(self.env.clone()));

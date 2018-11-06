@@ -81,6 +81,10 @@ impl Value {
         let token = tokens.remove(0);
 
         match token {
+            Token::RightParen => {
+                return Err(ParseError::ErroneousToken(")".to_string()).into());
+            }
+
             Token::LeftParen => {
                 let mut list: Vec<Value> = Vec::new();
 
@@ -91,8 +95,6 @@ impl Value {
                 tokens.remove(0);
                 Ok(List(list))
             }
-
-            Token::RightParen => Err(ParseError::ErroneousToken(")".to_string()))?,
 
             Token::Item(s) => {
                 // handle quoted lists: '(<expr> <expr> ...)

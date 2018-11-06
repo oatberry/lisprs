@@ -30,19 +30,19 @@ impl Interpreter {
             if let Err(err) = self.run(line.as_str()) {
                 match err.downcast::<ParseError>() {
                     Ok(ParseError::Empty) => continue,
+
                     Ok(err) => log::warn(format!(
-                        "parsing error in {}:{}:\n  {}\n  {}",
+                        "parsing error in {}:{}:\n  {}",
                         filename,
                         linenum + 1,
-                        err,
-                        line
+                        err
                     )),
+
                     Err(err) => log::warn(format!(
-                        "runtime error in {}:{}:\n  {}\n  {}",
+                        "runtime error in {}:{}:\n  {}",
                         filename,
                         linenum + 1,
-                        err,
-                        line
+                        err
                     )),
                 }
             }

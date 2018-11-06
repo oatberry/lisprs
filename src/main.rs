@@ -43,16 +43,17 @@ fn main() {
         let input = rl.readline(&prompt);
 
         match input {
-            Ok(line) => {
-                if !line.is_empty() {
-                    if line.starts_with('>') && line.len() > 1 {
-                        println!("{}", command(&interpreter, &line[1..], &opt));
-                    } else {
-                        rl.add_history_entry(line.as_ref());
-                        match interpreter.run(line) {
-                            Ok(result) => println!("{}", result),
-                            Err(err) => log::error(err),
-                        }
+            // `line` is a ref here to avoid moving into the match arm.
+            // rustc --explain E0008
+            Ok(ref line) if !line.is_empty() => {
+                if line.starts_with('>') && line.len() > 1 {
+                    println!("{}", command(&interpreter, &line[1..], &opt));
+                } else {
+                    rl.add_history_entry(line.as_ref());
+
+                    match interpreter.run(line.clone()) {
+                        Ok(result) => println!("{}", result),
+                        Err(err) => log::error(err),
                     }
                 }
             }
@@ -71,6 +72,8 @@ fn main() {
                 log::error(err);
                 break;
             }
+
+            _ => continue,
         }
     }
 
@@ -80,6 +83,7 @@ fn main() {
 fn command(interpreter: &Interpreter, cmd: &str, opt: &Opt) -> String {
     match cmd {
         "env" => join(interpreter.env.borrow().vars.keys(), ", "),
+
         "save" => {
             if let Some(initfile) = &opt.initfile {
                 match interpreter.save_env(initfile) {
@@ -93,6 +97,7 @@ fn command(interpreter: &Interpreter, cmd: &str, opt: &Opt) -> String {
                 "no initfile set.".to_owned()
             }
         }
+
         _ => "invalid command".to_owned(),
     }
 }
