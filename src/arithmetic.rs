@@ -12,7 +12,7 @@ impl ops::Add for Value {
             (Float(a), Float(b))     => Float(a + b),
             (Integer(a), Float(b))   => Float(a as f64 + b),
             (Float(a), Integer(b))   => Float(a + (b as f64)),
-            (_, _) => unreachable!(),
+            _ => unreachable!(),
         }
     }
 }
@@ -26,7 +26,7 @@ impl ops::Sub for Value {
             (Float(a), Float(b))     => Float(a - b),
             (Integer(a), Float(b))   => Float(a as f64 - b),
             (Float(a), Integer(b))   => Float(a - (b as f64)),
-            (_, _) => unreachable!(),
+            _ => unreachable!(),
         }
     }
 }
@@ -40,7 +40,7 @@ impl ops::Mul for Value {
             (Float(a), Float(b))     => Float(a * b),
             (Integer(a), Float(b))   => Float(a as f64 * b),
             (Float(a), Integer(b))   => Float(a * (b as f64)),
-            (_, _) => unreachable!(),
+            _ => unreachable!(),
         }
     }
 }
