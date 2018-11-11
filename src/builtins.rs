@@ -416,11 +416,15 @@ pub fn cons(mut args: Vec<Value>, env: EnvRef) -> Result<Value, Error> {
     check_num_args!(args, 2, "cons")?;
 
     args = eval::eval_list(args, env)?;
-    let mut list: Vec<Value> = extract!(args.pop().unwrap(), List, "cons")?;
-    let value = args.pop().unwrap();
-
-    list.insert(0, value);
-    Ok(List(list))
+    let a = args.pop().unwrap();
+    if let List(mut list) = a {
+        let value = args.pop().unwrap();
+        list.insert(0, value);
+        Ok(List(list))
+    } else {
+        let value = args.pop().unwrap();
+        Ok(List(vec![value, a]))
+    }
 }
 
 /// get the length of a list or a string
